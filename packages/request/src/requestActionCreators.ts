@@ -14,7 +14,7 @@ export interface IRequestAction extends Action {
 }
 
 interface IRequestActionCreator<TReq, TResp, TMeta> {
-  (args: TReq, moreMeta: TMeta): IRequestAction;
+  (args: TReq, moreMeta?: TMeta): IRequestAction;
 
   TReq: TReq;
   TResp: TResp;

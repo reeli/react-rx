@@ -1,12 +1,9 @@
 import { AxiosError, AxiosRequestConfig, AxiosResponse } from "axios";
 import { assign } from "lodash";
+import { createRequestFailedActionType, createRequestStartActionType, createRequestSuccessActionType } from "./utils";
 
 interface Action<T = any> {
   type: T;
-}
-
-interface AnyAction extends Action {
-  [extraProps: string]: any;
 }
 
 export interface IRequestAction extends Action {
@@ -115,9 +112,3 @@ export const createRequestFailedAction = (action: IRequestAction, error: AxiosEr
     error: true,
   };
 };
-
-const createRequestStartActionType = (type: string) => `${type}_START`;
-const createRequestSuccessActionType = (type: string) => `${type}_SUCCESS`;
-const createRequestFailedActionType = (type: string) => `${type}_FAILED`;
-
-export const isRequestAction = (action: AnyAction) => action.meta && action.meta.request;

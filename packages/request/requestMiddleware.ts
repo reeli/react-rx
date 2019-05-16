@@ -5,8 +5,8 @@ import {
   createRequestStartAction,
   createRequestSuccessAction,
   IRequestAction,
-  isRequestAction,
 } from "./requestActionCreators";
+import { isRequestAction } from "./utils";
 
 export const requestMiddleware = (axiosIntance: AxiosInstance) => ({ dispatch }: MiddlewareAPI) => (next: Dispatch) => (
   action: AnyAction,

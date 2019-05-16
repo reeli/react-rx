@@ -13,13 +13,16 @@ export interface IRequestAction extends Action {
   payload: AxiosRequestConfig;
 }
 
-interface IRequestActionCreator<TReq, TResp> {
-  (args?: TReq): IRequestAction;
+interface IRequestActionCreator<TReq, TResp, TMeta> {
+  (args: TReq, moreMeta: TMeta): IRequestAction;
 
   TReq: TReq;
   TResp: TResp;
   name: string;
   toString: () => string;
+  start: {
+    toString: () => string;
+  };
   success: {
     toString: () => string;
   };
@@ -28,12 +31,12 @@ interface IRequestActionCreator<TReq, TResp> {
   };
 }
 
-export const createRequestActionCreator = <TReq, TResp, TMeta>(
+export const createRequestActionCreator = <TReq = undefined, TResp = any, TMeta = any>(
   type: string,
-  reqConfigCreator: (args?: TReq) => AxiosRequestConfig,
+  reqConfigCreator: (args: TReq) => AxiosRequestConfig,
   extraMeta: TMeta = {} as TMeta,
-): IRequestActionCreator<TReq, TResp> => {
-  const actionCreator = (args?: TReq, moreMeta: TMeta = {} as TMeta): IRequestAction => ({
+): IRequestActionCreator<TReq, TResp, TMeta> => {
+  const actionCreator = (args: TReq, moreMeta: TMeta = {} as TMeta): IRequestAction => ({
     type,
     meta: {
       request: true,
@@ -45,6 +48,9 @@ export const createRequestActionCreator = <TReq, TResp, TMeta>(
 
   return assign(actionCreator, {
     toString: () => type,
+    start: {
+      toString: () => createRequestStartActionType(type),
+    },
     success: {
       toString: () => createRequestSuccessActionType(type),
     },

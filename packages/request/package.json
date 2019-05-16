@@ -4,12 +4,21 @@
   "description": "Request module",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": ""
   },
   "author": "reeli",
   "license": "ISC",
-  "dependencies": {
-    "axios": "^0.18.0",
-    "react": "^16.7.0-alpha.2"
+  "peerDependencies": {
+    "axios": "0.18.x",
+    "react": "16.8.x",
+    "lodash": "4.17.x",
+    "redux": "4.0.x"
+  },
+  "devDependencies": {
+    "@types/axios": "0.14.0",
+    "@types/lodash": "4.14.129",
+    "@types/react": "16.8.17",
+    "prettier": "1.17.1",
+    "@types/redux": "3.6.0"
   }
 }

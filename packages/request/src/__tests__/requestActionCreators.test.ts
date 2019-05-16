@@ -1,0 +1,40 @@
+import { createRequestActionCreator } from "../requestActionCreators";
+
+const requestActionCreator = createRequestActionCreator(
+  "REQUEST_ACTION",
+  ({ name, age }: { name: string; age: number }) => ({
+    method: "GET",
+    url: "/mock-api",
+    data: {
+      name,
+      age,
+    },
+  }),
+);
+
+const requestAction = requestActionCreator({ name: "TW", age: 20 });
+
+describe("requestActionCreators", () => {
+  it("#createRequestActionCreator", () => {
+    const expectedResult = {
+      type: "REQUEST_ACTION",
+      payload: {
+        method: "GET",
+        url: "/mock-api",
+        data: {
+          name: "TW",
+          age: 20,
+        },
+      },
+      meta: {
+        request: true,
+      },
+    };
+
+    expect(requestAction).toEqual(expectedResult);
+    expect(requestActionCreator.toString()).toEqual("REQUEST_ACTION");
+    expect(requestActionCreator.start.toString()).toEqual("REQUEST_ACTION_Start");
+    expect(requestActionCreator.success.toString()).toEqual("REQUEST_ACTION_Success");
+    expect(requestActionCreator.failed.toString()).toEqual("REQUEST_ACTION_Failed");
+  });
+});

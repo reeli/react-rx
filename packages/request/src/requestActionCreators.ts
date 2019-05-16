@@ -1,6 +1,6 @@
 import { AxiosError, AxiosRequestConfig, AxiosResponse } from "axios";
 import { assign } from "lodash";
-import { createRequestFailedActionType, createRequestStartActionType, createRequestSuccessActionType } from "./utils";
+import { createRequestFailActionType, createRequestStartActionType, createRequestSuccessActionType } from "./utils";
 
 interface Action<T = any> {
   type: T;
@@ -13,7 +13,7 @@ export interface IRequestAction extends Action {
   payload: AxiosRequestConfig;
 }
 
-interface IRequestActionCreator<TReq, TResp, TMeta> {
+export interface IRequestActionCreator<TReq, TResp, TMeta> {
   (args: TReq, moreMeta?: TMeta): IRequestAction;
 
   TReq: TReq;
@@ -26,7 +26,7 @@ interface IRequestActionCreator<TReq, TResp, TMeta> {
   success: {
     toString: () => string;
   };
-  failed: {
+  fail: {
     toString: () => string;
   };
 }
@@ -54,8 +54,8 @@ export const createRequestActionCreator = <TReq = undefined, TResp = any, TMeta 
     success: {
       toString: () => createRequestSuccessActionType(type),
     },
-    failed: {
-      toString: () => createRequestFailedActionType(type),
+    fail: {
+      toString: () => createRequestFailActionType(type),
     },
     name: type,
     TReq: {} as TReq,
@@ -79,7 +79,7 @@ export const createRequestStartAction = (action: IRequestAction): IRequestStartA
   };
 };
 
-interface IRequestSuccessAction<TResp> extends Action {
+export interface IRequestSuccessAction<TResp> extends Action {
   meta: {
     prevAction: IRequestAction;
   };
@@ -101,7 +101,7 @@ export const createRequestSuccessAction = <TResp>(
   };
 };
 
-interface IRequestFailedAction extends Action {
+export interface IRequestFailAction extends Action {
   meta: {
     prevAction: IRequestAction;
   };
@@ -109,8 +109,8 @@ interface IRequestFailedAction extends Action {
   error: true;
 }
 
-export const createRequestFailedAction = (action: IRequestAction, error: AxiosError): IRequestFailedAction => {
-  const type = createRequestFailedActionType(action.type);
+export const createRequestFailAction = (action: IRequestAction, error: AxiosError): IRequestFailAction => {
+  const type = createRequestFailActionType(action.type);
 
   return {
     type,

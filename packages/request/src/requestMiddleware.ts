@@ -1,7 +1,7 @@
 import { AxiosInstance } from "axios";
 import { AnyAction, Dispatch, MiddlewareAPI } from "redux";
 import {
-  createRequestFailedAction,
+  createRequestFailAction,
   createRequestStartAction,
   createRequestSuccessAction,
   IRequestAction,
@@ -18,7 +18,7 @@ export const requestMiddleware = (axiosIntance: AxiosInstance) => ({ dispatch }:
     return axiosIntance
       .request(action.payload)
       .then((response) => dispatch(createRequestSuccessAction(requestAction, response)))
-      .catch((error) => dispatch(createRequestFailedAction(requestAction, error)));
+      .catch((error) => dispatch(createRequestFailAction(requestAction, error)));
   }
   return next(action);
 };

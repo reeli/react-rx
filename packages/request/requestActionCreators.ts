@@ -28,14 +28,17 @@ interface IRequestActionCreator<TReq, TResp> {
   };
 }
 
-export const createRequestActionCreator = <TReq, TResp>(
+export const createRequestActionCreator = <TReq, TResp, TMeta>(
   type: string,
   reqConfigCreator: (args?: TReq) => AxiosRequestConfig,
+  extraMeta: TMeta = {} as TMeta,
 ): IRequestActionCreator<TReq, TResp> => {
-  const actionCreator = (args?: TReq): IRequestAction => ({
+  const actionCreator = (args?: TReq, moreMeta: TMeta = {} as TMeta): IRequestAction => ({
     type,
     meta: {
       request: true,
+      ...extraMeta,
+      ...moreMeta,
     },
     payload: reqConfigCreator(args),
   });

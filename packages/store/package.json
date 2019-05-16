@@ -8,7 +8,13 @@
   },
   "author": "reeli",
   "license": "ISC",
-  "dependencies": {
-    "react": "^16.7.0-alpha.2"
+  "peerDependencies": {
+    "react": "16.8.x",
+    "redux": "4.0.x",
+    "rxjs": "6.5.x"
+  },
+  "devDependencies": {
+    "@types/react": "16.8.17",
+    "@types/redux": "3.6.0"
   }
 }

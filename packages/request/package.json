@@ -6,11 +6,13 @@
   "author": "reeli",
   "license": "ISC",
   "peerDependencies": {
-    "axios": "0.18.x",
-    "react": "16.8.x",
-    "lodash": "4.17.x",
-    "redux": "4.0.x",
-    "rxjs": "6.5.x"
+    "react": ">=16.8.x",
+    "lodash": ">=4.17.x",
+    "redux": ">=4.0.x",
+    "rxjs": ">=6.5.x"
+  },
+  "dependencies": {
+    "axios": "0.18.x"
   },
   "devDependencies": {
     "@types/axios": "0.14.0",

@@ -1,89 +1,56 @@
 import { DependencyList, useEffect, useMemo } from "react";
-import { AnyAction } from "redux";
-import { BehaviorSubject } from "rxjs";
-import { useSelector } from "src-modules/store";
-import { IRequestAction, IRequestSuccessAction } from "./index";
-import { IRequestCallbacks } from "../rx-connect/rxConnect";
-import { useRxDispatch } from "../rx-connect/useRxDispatch";
-import { updateTempData } from "./actions";
-import { defaultReducer } from "./defaultReducer";
-import { RequestStage, TReducer } from "./types";
+import { AnyAction, Reducer } from "redux";
+import { useRequest } from "./useRequest";
+import { IRequestActionCreator } from "./requestActionCreators";
+import { useDispatch, useSelector } from "../../store/src/useStore";
+import { defaultReducer } from "./reducer";
+import { updateTempDataActionCreator } from "./action";
 
-interface IRequestActionCreator<TReq = any, TRes = any> {
-  (args: TReq | undefined, meta: IRequestCallbacks): IRequestAction;
-
-  groupName: string;
-  TResp: TRes;
-  TArgs: TReq;
-}
-
-interface ITempDataProps<T extends IRequestActionCreator> {
-  destroyOnUnmount?: boolean; // TODO: To be removed, replace by useEntity. should add reducer in this case 或者 useRequest + useStoreState, 自由组合
+interface ITempDataProps {
   scope?: string;
-  reducer?: TReducer<IRequestSuccessAction<T["TResp"]>>; // TODO: To be removed, or create another useTempDataXXX to handle this case
-  autoFetch?: boolean; // TODO: To be removed
 }
 
-// 充分利用泛型进行推导
-export const useTempData = <T extends IRequestActionCreator>(
+export const useTempData = <T extends IRequestActionCreator<T["TReq"], T["TResp"]>>(
   actionCreator: T,
-  args: T["TArgs"],
+  args: T["TReq"],
   deps: DependencyList = [],
-  { destroyOnUnmount = true, reducer = defaultReducer, scope }: ITempDataProps<T>,
+  { scope }: ITempDataProps,
 ) => {
-  // TODO: wrapper BehaviorSubject by useMemo, and move requestStage$ to useRequest
-  const requestStage$ = new BehaviorSubject<RequestStage>(RequestStage.INITIAL);
-  const groupName = scope ? `${scope}${actionCreator.groupName}` : actionCreator.groupName;
+  const groupName = scope ? `${scope}${actionCreator.name}` : actionCreator.name;
 
-  const data = useSelector((state: any) => state.tempData[groupName]);
-  const dispatch = useRxDispatch();
+  const state = useSelector((state: any) => state.tempData[groupName]);
+  const dispatch = useDispatch();
 
-  const { fetchData, updateData } = useMemo(() => {
-    const fetchData = (requestArgs = args) => {
-      requestStage$.next(RequestStage.START);
+  const { fetchData, updateData, requestStage$ } = useMemo(() => {
+    const [request, requestStage$] = useRequest(actionCreator, {
+      onSuccess: (action) => {
+        updateData(action)(defaultReducer);
+      },
+    });
 
-      const requestAction = actionCreator(requestArgs, {
-        success: (requestSuccessAction) => {
-          updateData<IRequestSuccessAction>(requestSuccessAction)(reducer);
-          requestStage$.next(RequestStage.SUCCESS);
-        },
-        failed: () => {
-          requestStage$.next(RequestStage.FAIL);
-        },
-      });
-      return dispatch(requestAction);
-    };
-
-    const updateData = <TAction extends AnyAction>(action: TAction) => (reducer: TReducer<TAction>) =>
-      dispatch(updateTempData(groupName, reducer(data, action)));
+    const updateData = <TAction extends AnyAction>(action: TAction) => (reducer: Reducer<any, TAction>) =>
+      dispatch(updateTempDataActionCreator(groupName, reducer(state, action)));
 
     return {
-      fetchData,
+      fetchData: (reqArgs: T["TReq"] = args) => request(reqArgs),
       updateData,
+      requestStage$,
     };
   }, []);
 
   useEffect(() => {
-    // TODO: Remove data here.
-    if (!data) {
-      // should call api request when data exist?
-      fetchData(args);
-    }
+    fetchData(args);
   }, deps);
 
-  useEffect(() => {
-    return () => {
-      if (destroyOnUnmount) {
-        updateTempData(groupName, undefined);
-      }
-    };
-  }, []);
+  useEffect(() =>
+    () => {
+      updateTempDataActionCreator(groupName, undefined);
+    }, []);
 
-  // TODO: Which case will use updateData?
-  return [data, requestStage$, fetchData, updateData] as [
+  return [state, requestStage$, fetchData, updateData] as [
     typeof actionCreator["TResp"],
     typeof requestStage$,
     typeof fetchData,
     typeof updateData
-  ];
+    ];
 };

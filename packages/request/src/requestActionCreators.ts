@@ -13,7 +13,7 @@ export interface IRequestAction extends Action {
   payload: AxiosRequestConfig;
 }
 
-export interface IRequestActionCreator<TReq, TResp, TMeta> {
+export interface IRequestActionCreator<TReq, TResp = any, TMeta = any> {
   (args: TReq, extraMeta?: TMeta): IRequestAction;
 
   TReq: TReq;

@@ -14,7 +14,7 @@ export interface IRequestAction extends Action {
 }
 
 export interface IRequestActionCreator<TReq, TResp, TMeta> {
-  (args: TReq, moreMeta?: TMeta): IRequestAction;
+  (args: TReq, extraMeta?: TMeta): IRequestAction;
 
   TReq: TReq;
   TResp: TResp;
@@ -31,17 +31,15 @@ export interface IRequestActionCreator<TReq, TResp, TMeta> {
   };
 }
 
-export const createRequestActionCreator = <TReq = undefined, TResp = any, TMeta = any>(
+export const createRequestActionCreator = <TReq, TResp = any, TMeta = any>(
   type: string,
   reqConfigCreator: (args: TReq) => AxiosRequestConfig,
-  extraMeta: TMeta = {} as TMeta,
-): IRequestActionCreator<TReq, TResp, TMeta> => {
-  const actionCreator = (args: TReq, moreMeta: TMeta = {} as TMeta): IRequestAction => ({
+) => {
+  const actionCreator = (args: TReq, extraMeta: TMeta = {} as TMeta): IRequestAction => ({
     type,
     meta: {
       request: true,
       ...extraMeta,
-      ...moreMeta,
     },
     payload: reqConfigCreator(args),
   });
@@ -88,7 +86,7 @@ export interface IRequestSuccessAction<TResp> extends Action {
 
 export const createRequestSuccessAction = <TResp>(
   action: IRequestAction,
-  res: AxiosResponse<TResp>,
+  resp: AxiosResponse<TResp>,
 ): IRequestSuccessAction<TResp> => {
   const type = createRequestSuccessActionType(action.type);
 
@@ -97,7 +95,7 @@ export const createRequestSuccessAction = <TResp>(
     meta: {
       prevAction: action,
     },
-    payload: res,
+    payload: resp,
   };
 };
 

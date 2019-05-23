@@ -6,7 +6,7 @@ import { useDispatch, useSelector } from "../../store/src/useStore";
 import { defaultReducer } from "./reducer";
 import { updateTempDataActionCreator } from "./action";
 
-interface ITempDataProps {
+interface ITempDataOptions {
   scope?: string;
 }
 
@@ -14,7 +14,7 @@ export const useTempData = <T extends IRequestActionCreator<T["TReq"], T["TResp"
   actionCreator: T,
   args: T["TReq"],
   deps: DependencyList = [],
-  { scope }: ITempDataProps,
+  { scope }: ITempDataOptions,
 ) => {
   const groupName = scope ? `${scope}${actionCreator.name}` : actionCreator.name;
 

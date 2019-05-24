@@ -44,7 +44,7 @@ export const useTempData = <T extends IRequestActionCreator<T["TReq"], T["TResp"
 
   useEffect(() =>
     () => {
-      updateTempDataActionCreator(groupName, undefined);
+      dispatch(updateTempDataActionCreator(groupName, undefined));
     }, []);
 
   return [state, requestStage$, fetchData, updateData] as [

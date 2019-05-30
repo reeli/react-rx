@@ -16,7 +16,7 @@ export const useTempData = <T extends IRequestActionCreator<T["TReq"], T["TResp"
   deps: DependencyList = [],
   { scope }: ITempDataOptions,
 ) => {
-  const groupName = scope ? `${scope}${actionCreator.name}` : actionCreator.name;
+  const groupName = scope ? `${scope}${actionCreator.$name}` : actionCreator.$name;
 
   const state = useSelector((state: any) => state.tempData[groupName]);
   const dispatch = useDispatch();

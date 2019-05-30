@@ -18,7 +18,7 @@ export interface IRequestActionCreator<TReq, TResp = any, TMeta = any> {
 
   TReq: TReq;
   TResp: TResp;
-  name: string;
+  $name: string;
   toString: () => string;
   start: {
     toString: () => string;
@@ -55,7 +55,7 @@ export const createRequestActionCreator = <TReq, TResp = any, TMeta = any>(
     fail: {
       toString: () => createRequestFailActionType(type),
     },
-    name: type,
+    $name: type,
     TReq: {} as TReq,
     TResp: {} as TResp,
   });

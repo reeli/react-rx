@@ -1,8 +1,8 @@
 import { createRequestActionCreator } from "../requestActionCreators";
 
-const requestActionCreator = createRequestActionCreator(
+const requestActionCreator = createRequestActionCreator<{ name: string, age: number }>(
   "REQUEST_ACTION",
-  ({ name, age }: { name: string; age: number }) => ({
+  ({ name, age }) => ({
     method: "GET",
     url: "/mock-api",
     data: {

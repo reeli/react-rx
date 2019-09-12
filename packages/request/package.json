@@ -7,17 +7,17 @@
   "license": "ISC",
   "peerDependencies": {
     "lodash": ">=4.17.x",
-    "react": ">=16.8.x",
+    "react": ">=16.9.x",
     "redux": ">=4.0.x",
     "rxjs": ">=6.5.x"
   },
   "dependencies": {
-    "axios": "0.18.x"
+    "axios": "0.19.x"
   },
   "devDependencies": {
     "@types/axios": "0.14.0",
     "@types/lodash": "4.14.138",
-    "@types/react": "16.8.17",
+    "@types/react": "16.9.2",
     "@types/redux": "3.6.0",
     "axios-mock-adapter": "1.17.0",
     "@types/axios-mock-adapter": "1.10.0"

@@ -1,3 +1,3 @@
 export * from "./requestActionCreators";
-export * from "./requestMiddleware";
+export * from "./createRequestMiddleware";
 export * from "./utils";

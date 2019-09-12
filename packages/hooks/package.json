@@ -1,5 +1,5 @@
 {
-  "name": "@react-rx/store",
+  "name": "@react-rx/hooks",
   "version": "0.0.0",
   "description": "State container",
   "main": "index.js",

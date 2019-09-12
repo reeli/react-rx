@@ -6,7 +6,7 @@ import {
   isRequestFailAction,
   isRequestSuccessAction,
 } from "./index";
-import { useDispatch } from "../../store/src/useStore";
+import { useDispatch } from "../../hooks/src/useStore";
 import { BehaviorSubject, merge, Subject } from "rxjs";
 import { AnyAction } from "redux";
 import { filter, tap } from "rxjs/operators";

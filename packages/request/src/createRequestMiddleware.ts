@@ -8,7 +8,7 @@ import {
 } from "./requestActionCreators";
 import { isRequestAction } from "./utils";
 
-export const requestMiddleware = (axiosIntance: AxiosInstance) => ({ dispatch }: MiddlewareAPI) => (next: Dispatch) => (
+export const createRequestMiddleware = (axiosIntance: AxiosInstance) => ({ dispatch }: MiddlewareAPI) => (next: Dispatch) => (
   action: AnyAction,
 ) => {
   if (isRequestAction(action)) {

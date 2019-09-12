@@ -2,7 +2,7 @@ import { DependencyList, useEffect, useMemo, useRef } from "react";
 import { AnyAction, Reducer } from "redux";
 import { useRequest } from "./useRequest";
 import { IRequestActionCreator } from "./requestActionCreators";
-import { useDispatch, useSelector } from "../../store/src/useStore";
+import { useDispatch, useSelector } from "../../hooks/src/useStore";
 import { defaultReducer } from "./reducer";
 import { updateTempDataActionCreator } from "./action";
 

@@ -6,11 +6,11 @@ import {
   isRequestFailAction,
   isRequestSuccessAction,
 } from "./index";
-import { useDispatch } from "../../hooks/src/useStore";
 import { BehaviorSubject, merge, Subject } from "rxjs";
 import { AnyAction } from "redux";
 import { filter, tap } from "rxjs/operators";
 import { isEqual } from "lodash";
+import { useDispatch } from "../../hooks/src";
 
 export enum RequestStage {
   INITIAL = "INITIAL",

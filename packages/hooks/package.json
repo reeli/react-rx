@@ -9,16 +9,14 @@
   "author": "reeli",
   "license": "ISC",
   "peerDependencies": {
-    "react": "16.8.x",
-    "redux": "4.0.x",
-    "rxjs": "6.5.x"
+    "lodash": ">=4.17.x",
+    "react": ">=16.8.x",
+    "redux": ">=4.0.x",
+    "rxjs": ">=6.5.x"
   },
   "devDependencies": {
-    "@types/lodash": "^4.14.138",
+    "@types/lodash": "4.14.138",
     "@types/react": "16.8.17",
     "@types/redux": "3.6.0"
-  },
-  "dependencies": {
-    "lodash": "^4.17.15"
   }
 }

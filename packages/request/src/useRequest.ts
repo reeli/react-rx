@@ -24,7 +24,7 @@ interface IRequestCallbacks<TResp> {
   onFail?: (action: IRequestFailAction) => void;
 }
 
-export const useRequest = <T extends IRequestActionCreator<T["TReq"] | undefined, T["TResp"]>>(
+export const useRequest = <T extends IRequestActionCreator<T["TReq"], T["TResp"]>>(
   actionCreator: T,
   options: IRequestCallbacks<T["TResp"]> = {},
 ) => {
@@ -35,7 +35,7 @@ export const useRequest = <T extends IRequestActionCreator<T["TReq"] | undefined
 
   const { request, requestStage$ } = useMemo(() => {
     const requestStage$ = new BehaviorSubject(RequestStage.INITIAL);
-    const request = <TMeta = any>(args: T["TReq"] | undefined, requestMetaConfig?: TMeta) => {
+    const request = <TMeta = any>(args: T["TReq"], requestMetaConfig?: TMeta) => {
       requestStage$.next(RequestStage.START);
 
       const action = actionCreator(args, requestMetaConfig);

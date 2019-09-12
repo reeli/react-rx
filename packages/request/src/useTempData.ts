@@ -7,9 +7,9 @@ import { useDispatch, useSelector } from "../../hooks/src";
 
 const defaultReducer = <TResp>(_: void, action: IRequestSuccessAction<TResp>) => action.payload.data;
 
-export const useTempData = <T extends IRequestActionCreator<T["TReq"] | undefined, T["TResp"]>>(
+export const useTempData = <T extends IRequestActionCreator<T["TReq"], T["TResp"]>>(
   actionCreator: T,
-  args: T["TReq"] | undefined,
+  args: T["TReq"],
   deps: DependencyList = [],
   reducer?: Reducer<any>,
 ) => {

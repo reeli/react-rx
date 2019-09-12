@@ -1,10 +1,11 @@
 import { DependencyList, useEffect, useMemo, useRef } from "react";
 import { AnyAction, Reducer } from "redux";
 import { useRequest } from "./useRequest";
-import { IRequestActionCreator } from "./requestActionCreators";
-import { defaultReducer } from "./reducer";
+import { IRequestActionCreator, IRequestSuccessAction } from "./requestActionCreators";
 import { updateTempDataActionCreator } from "./action";
 import { useDispatch, useSelector } from "../../hooks/src";
+
+const defaultReducer = <TResp>(_: void, action: IRequestSuccessAction<TResp>) => action.payload.data;
 
 export const useTempData = <T extends IRequestActionCreator<T["TReq"] | undefined, T["TResp"]>>(
   actionCreator: T,

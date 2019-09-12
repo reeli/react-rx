@@ -3,9 +3,9 @@ import { Subject } from "rxjs";
 
 export const createRxMiddleware = () => {
   const rootSubject$ = new Subject();
-  return () => {
-    return (next: Dispatch) => {
-      return (action: any) => {
+  return () =>
+    (next: Dispatch) =>
+      (action: any) => {
         if (action instanceof Subject) {
           return rootSubject$.subscribe(action);
         }
@@ -13,6 +13,4 @@ export const createRxMiddleware = () => {
         rootSubject$.next(action);
         return result;
       };
-    };
-  };
 };

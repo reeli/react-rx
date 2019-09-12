@@ -1,7 +1,16 @@
-import { useMemo } from "react";
-import { IRequestActionCreator, IRequestFailAction, IRequestSuccessAction } from "./index";
+import { useEffect, useMemo, useRef } from "react";
+import {
+  IRequestActionCreator,
+  IRequestFailAction,
+  IRequestSuccessAction,
+  isRequestFailAction,
+  isRequestSuccessAction,
+} from "./index";
 import { useDispatch } from "../../store/src/useStore";
-import { BehaviorSubject } from "rxjs";
+import { BehaviorSubject, merge, Subject } from "rxjs";
+import { AnyAction } from "redux";
+import { filter, tap } from "rxjs/operators";
+import { isEqual } from "lodash";
 
 export enum RequestStage {
   INITIAL = "INITIAL",
@@ -15,35 +24,65 @@ interface IRequestCallbacks<TResp> {
   onFail?: (action: IRequestFailAction) => void;
 }
 
-export const useRequest = <TReq, TResp>(
-  actionCreator: IRequestActionCreator<TReq, TResp, IRequestCallbacks<TResp>>,
-  options: IRequestCallbacks<TResp> = {},
+export const useRequest = <T extends IRequestActionCreator<T["TReq"] | undefined, T["TResp"]>>(
+  actionCreator: T,
+  options: IRequestCallbacks<T["TResp"]> = {},
 ) => {
   const dispatch = useDispatch();
+  const lastActionRef = useRef<AnyAction>();
+  const optionsRef = useRef(options);
+  optionsRef.current = options;
 
-  const [request, requestStage$] = useMemo(() => {
-    // Create BehaviorSubject inside useMemo to avoid be recreated when every render
-    const sub$ = new BehaviorSubject(RequestStage.INITIAL);
-
-    const request = (args: TReq) => {
+  const { request, requestStage$ } = useMemo(() => {
+    const requestStage$ = new BehaviorSubject(RequestStage.INITIAL);
+    const request = <TMeta = any>(args: T["TReq"] | undefined, requestMetaConfig?: TMeta) => {
       requestStage$.next(RequestStage.START);
 
-      const requestAction = actionCreator(args, {
-        onSuccess: (action) => {
-          options.onSuccess && options.onSuccess(action);
-          sub$.next(RequestStage.SUCCESS);
-        },
-        onFail: (action) => {
-          options.onFail && options.onFail(action);
-          sub$.next(RequestStage.FAIL);
-        },
-      });
+      const action = actionCreator(args, requestMetaConfig);
+      lastActionRef.current = action;
 
-      dispatch(requestAction);
+      dispatch(action);
     };
-    return [request, sub$];
+
+    return {
+      request,
+      requestStage$,
+    };
   }, []);
 
-  // We have to use as here, otherwise the type will be Array<typeof  requestFn | typeof requestStage$>
-  return [request, requestStage$] as [typeof request, typeof requestStage$];
+  useEffect(() => {
+    const subject$ = new Subject<AnyAction>();
+    const rootSubscription = dispatch<any>(subject$);
+
+    const isActionsEqual = (action: IRequestSuccessAction | IRequestFailAction) =>
+      !!lastActionRef.current &&
+      action.meta.prevAction.type === lastActionRef.current.type &&
+      isEqual(action.meta.prevAction.payload, lastActionRef.current.payload);
+
+    const subscription = merge(
+      subject$.pipe(
+        filter(isRequestSuccessAction),
+        filter(isActionsEqual),
+        tap((requestSuccessAction) => {
+          requestStage$.next(RequestStage.SUCCESS);
+          optionsRef.current.onSuccess && optionsRef.current.onSuccess(requestSuccessAction as IRequestSuccessAction);
+        }),
+      ),
+      subject$.pipe(
+        filter(isRequestFailAction),
+        filter(isActionsEqual),
+        tap((requestFailAction) => {
+          requestStage$.next(RequestStage.FAIL);
+          optionsRef.current.onFail && optionsRef.current.onFail(requestFailAction as IRequestFailAction);
+        }),
+      ),
+    ).subscribe();
+
+    return () => {
+      subscription.unsubscribe();
+      rootSubscription.unsubscribe();
+    };
+  }, []);
+
+  return [request, requestStage$] as [typeof request, BehaviorSubject<RequestStage>];
 };

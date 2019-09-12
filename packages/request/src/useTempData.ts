@@ -1,4 +1,4 @@
-import { DependencyList, useEffect, useMemo } from "react";
+import { DependencyList, useEffect, useMemo, useRef } from "react";
 import { AnyAction, Reducer } from "redux";
 import { useRequest } from "./useRequest";
 import { IRequestActionCreator } from "./requestActionCreators";
@@ -6,37 +6,28 @@ import { useDispatch, useSelector } from "../../store/src/useStore";
 import { defaultReducer } from "./reducer";
 import { updateTempDataActionCreator } from "./action";
 
-interface ITempDataOptions {
-  scope?: string;
-}
-
-export const useTempData = <T extends IRequestActionCreator<T["TReq"], T["TResp"]>>(
+export const useTempData = <T extends IRequestActionCreator<T["TReq"] | undefined, T["TResp"]>>(
   actionCreator: T,
-  args: T["TReq"],
+  args: T["TReq"] | undefined,
   deps: DependencyList = [],
-  { scope }: ITempDataOptions,
+  reducer?: Reducer<any>,
 ) => {
-  const groupName = scope ? `${scope}${actionCreator.$name}` : actionCreator.$name;
+  const state = useSelector((state: any) => state.tempData[actionCreator.$name]);
+  const stateRef = useRef(null);
+  stateRef.current = state;
 
-  const state = useSelector((state: any) => state.tempData[groupName]);
   const dispatch = useDispatch();
 
-  const { fetchData, updateData, requestStage$ } = useMemo(() => {
-    const [request, requestStage$] = useRequest(actionCreator, {
-      onSuccess: (action) => {
-        updateData(action)(defaultReducer);
-      },
-    });
+  const updateData = useMemo(() =>
+    <TAction extends AnyAction>(action: TAction) => (reducer: Reducer<any, TAction>) => dispatch(updateTempDataActionCreator(actionCreator.$name, reducer(stateRef.current, action))), []);
 
-    const updateData = <TAction extends AnyAction>(action: TAction) => (reducer: Reducer<any, TAction>) =>
-      dispatch(updateTempDataActionCreator(groupName, reducer(state, action)));
+  const [fetchData, requestStage$] = useRequest(actionCreator, {
+    onSuccess: (action) => {
+      const updateDataReducer = reducer || defaultReducer;
+      updateData(action)(updateDataReducer);
+    },
+  });
 
-    return {
-      fetchData: (reqArgs: T["TReq"] = args) => request(reqArgs),
-      updateData,
-      requestStage$,
-    };
-  }, []);
 
   useEffect(() => {
     fetchData(args);
@@ -44,7 +35,7 @@ export const useTempData = <T extends IRequestActionCreator<T["TReq"], T["TResp"
 
   useEffect(() =>
     () => {
-      dispatch(updateTempDataActionCreator(groupName, undefined));
+      dispatch(updateTempDataActionCreator(actionCreator.$name, undefined));
     }, []);
 
   return [state, requestStage$, fetchData, updateData] as [
@@ -52,5 +43,5 @@ export const useTempData = <T extends IRequestActionCreator<T["TReq"], T["TResp"
     typeof requestStage$,
     typeof fetchData,
     typeof updateData
-    ];
+  ];
 };

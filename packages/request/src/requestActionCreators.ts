@@ -61,7 +61,7 @@ export const createRequestActionCreator = <TReq, TResp = any, TMeta = any>(
   });
 };
 
-interface IRequestStartAction extends Action {
+export interface IRequestStartAction extends Action {
   meta: {
     prevAction: IRequestAction;
   };
@@ -77,7 +77,7 @@ export const createRequestStartAction = (action: IRequestAction): IRequestStartA
   };
 };
 
-export interface IRequestSuccessAction<TResp> extends Action {
+export interface IRequestSuccessAction<TResp = any> extends Action {
   meta: {
     prevAction: IRequestAction;
   };

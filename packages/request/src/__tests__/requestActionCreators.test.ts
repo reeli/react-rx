@@ -33,8 +33,8 @@ describe("requestActionCreators", () => {
 
     expect(requestAction).toEqual(expectedResult);
     expect(requestActionCreator.toString()).toEqual("REQUEST_ACTION");
-    expect(requestActionCreator.start.toString()).toEqual("REQUEST_ACTION_Start");
-    expect(requestActionCreator.success.toString()).toEqual("REQUEST_ACTION_Success");
-    expect(requestActionCreator.fail.toString()).toEqual("REQUEST_ACTION_Fail");
+    expect(requestActionCreator.start.toString()).toEqual("REQUEST_ACTION_START");
+    expect(requestActionCreator.success.toString()).toEqual("REQUEST_ACTION_SUCCESS");
+    expect(requestActionCreator.fail.toString()).toEqual("REQUEST_ACTION_FAIL");
   });
 });

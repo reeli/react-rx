@@ -10,9 +10,9 @@ interface AnyAction extends Action {
 }
 
 enum RequestActionSuffix {
-  START = "_Start",
-  SUCCESS = "_Success",
-  FAIL = "_Fail",
+  START = "_START",
+  SUCCESS = "_SUCCESS",
+  FAIL = "_FAIL",
 }
 
 const checkActionTypeBySuffix = (suffix: string) => (action: AnyAction) =>

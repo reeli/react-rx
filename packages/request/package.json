@@ -12,7 +12,7 @@
     "rxjs": ">=6.5.x"
   },
   "dependencies": {
-    "axios": "0.19.x"
+    "axios": "0.20.x"
   },
   "devDependencies": {
     "@types/axios": "0.14.0",

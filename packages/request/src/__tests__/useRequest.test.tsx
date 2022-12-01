@@ -1,80 +1,38 @@
 import { renderHook } from "@testing-library/react-hooks";
-import React from "react";
-import { Subject } from "rxjs/internal/Subject";
+import axios from "axios";
+import type { ComponentType } from "react";
+import { createRequest, RequestProvider } from "../";
 import { useRequest } from "../useRequest";
-import { createRequestActionCreator } from "../requestActionCreators";
-import { StoreContext } from "packages/hooks/src";
 
-const getWrapper = (store: any) => ({ children }: any) => (
-  <StoreContext.Provider value={store}>{children}</StoreContext.Provider>
+const wrapper = ({ children }: { children: ComponentType }) => (
+  <RequestProvider value={{ axiosInstance: axios.create() }}>{children}</RequestProvider>
 );
-
-const testActionCreator = createRequestActionCreator<{ id?: string; }, ITestVo>("getTestDataUsingGet", ({ id }) => ({
-  url: `/api/tests/${id}`,
-  method: "get",
-}));
 
 describe("useRequest", () => {
   it("should return request function and requestStage$", () => {
-    const mockDispatch = jest.fn();
-    const store = {
-      dispatch: mockDispatch,
-      getState: jest.fn(),
-      subscribe: jest.fn(),
-      replaceReducer: jest.fn(),
-    };
-    const wrapper = getWrapper(store);
-    const { result } = renderHook(() => useRequest(testActionCreator), { wrapper });
+    const getTestDataUsingGet = createRequest<
+      { id?: string },
+      {
+        name: string;
+        age: number;
+      }
+    >("getTestDataUsingGet", ({ id }) => ({
+      url: `/api/tests/${id}`,
+      method: "get",
+    }));
+    const { result } = renderHook(() => useRequest(getTestDataUsingGet), { wrapper });
     const [getTestData] = result.current;
 
-    getTestData({ id: "test" });
+    getTestData({ id: "001" });
 
-    expect(mockDispatch).toHaveBeenCalledWith(
+    expect(getTestData).toHaveBeenCalledWith(
       expect.objectContaining({
         type: "getTestDataUsingGet",
         payload: {
           method: "get",
-          url: "/api/tests/test",
+          url: "/api/tests/001",
         },
       }),
     );
   });
-
-  it("should provide correct requestStage", () => {
-    const mockDispatch = jest.fn().mockImplementation((action: any) => {
-      if (!(action instanceof Subject)) {
-        action.meta.success && action.meta.success();
-        action.meta.failed && action.meta.failed();
-      }
-    });
-    const store = {
-      dispatch: mockDispatch,
-      getState: jest.fn(),
-      subscribe: jest.fn(),
-      replaceReducer: jest.fn(),
-    };
-    const wrapper = getWrapper(store);
-    const { result } = renderHook(
-      () =>
-        useRequest(testActionCreator, {
-          onSuccess: () => {
-            const [, requestStage$] = result.current;
-            expect(requestStage$.getValue()).toEqual("SUCCESS");
-          },
-          onFail: () => {
-            const [, requestStage$] = result.current;
-            expect(requestStage$.getValue()).toEqual("FAIL");
-          },
-        }),
-      { wrapper },
-    );
-    const [getTestData] = result.current;
-
-    getTestData({ id: "test" });
-  });
 });
-
-interface ITestVo {
-  name: string;
-  age: number;
-}

@@ -1,7 +1,8 @@
 {
   "compilerOptions": {
-    "target": "es2017",
+    "target": "esnext",
     "module": "commonjs",
+    "moduleResolution": "node",
     "jsx": "react-jsx",
     "strict": true,
     "alwaysStrict": true,
@@ -10,9 +11,10 @@
     "noUnusedParameters": true,
     "skipLibCheck": true,
     "esModuleInterop": true,
-    "outDir": ".tmp",
-    "moduleResolution": "node",
-    "baseUrl": "."
-  },
-  "exclude": ["node_modules"]
+    "baseUrl": "../..",
+    "outDir": "../../.tmp",
+    "allowSyntheticDefaultImports": true,
+    "sourceMap": true,
+    "jsxImportSource": "@emotion/react"
+  }
 }

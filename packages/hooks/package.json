@@ -1,22 +1,12 @@
 {
   "name": "@react-rx/hooks",
-  "version": "0.0.0",
-  "description": "State container",
-  "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "author": "reeli",
-  "license": "ISC",
+  "types": "src/index.ts",
+  "main": "src/index.ts",
   "peerDependencies": {
-    "lodash": ">=4.17.x",
-    "react": ">=16.9.x",
-    "redux": ">=4.0.x",
-    "rxjs": ">=6.5.x"
+    "react": "^18.0.2"
   },
-  "devDependencies": {
-    "@types/lodash": "4.14.138",
-    "@types/react": "16.9.2",
-    "@types/redux": "3.6.0"
+  "scripts": {
+    "tsc": "tsc",
+    "test": "jest"
   }
 }

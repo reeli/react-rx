@@ -1,7 +1,8 @@
 import { renderHook } from "@testing-library/react";
-import axios from "axios";
+import axios, { AxiosError } from "axios";
 import nock from "nock";
 import type { ReactNode } from "react";
+import { firstValueFrom } from "rxjs";
 import { createRequest, RequestProvider } from "../";
 import { useRequest } from "../useRequest";
 
@@ -23,37 +24,56 @@ describe("useRequest", () => {
     method: "get",
   }));
 
-  it("should notify response data and status when request succeed", (done) => {
-    nock(basePath).get("/api/tests/001").reply(200, { name: "Tom", age: 6 }, { "Access-Control-Allow-Origin": "*" });
+  describe("request success", () => {
+    let getTestData: any;
 
-    const { result } = renderHook(() => useRequest(getTestDataUsingGet), { wrapper });
-    const [getTestData, request$] = result.current;
+    beforeEach(() => {
+      nock(basePath).get("/api/tests/001").reply(200, { name: "Tom", age: 6 }, { "Access-Control-Allow-Origin": "*" });
+      const { result } = renderHook(() => useRequest(getTestDataUsingGet), { wrapper });
+      getTestData = result.current;
+      getTestData.request({ id: "001" });
+    });
 
-    getTestData({ id: "001" });
+    it("should notify response data and status when request succeed", async () => {
+      expect(await firstValueFrom(getTestData.data$)).toEqual({ name: "Tom", age: 6 });
+    });
 
-    request$?.subscribe(({ status, data, error }) => {
-      expect(data).toEqual({ name: "Tom", age: 6 });
-      expect(status).toEqual("success");
-      expect(error?.message).toEqual(undefined);
-      done();
+    it("should notify response status when request succeed", async () => {
+      await expect(await firstValueFrom(getTestData.status$)).toEqual({
+        isLoading: false,
+        isError: false,
+        isPending: false,
+        isSuccess: true,
+        isCompleted: true,
+      });
     });
   });
 
-  it("should notify error and status when request fail", (done) => {
-    nock(basePath)
-      .get("/api/tests/001")
-      .reply(500, { message: "Something went wrong" }, { "Access-Control-Allow-Origin": "*" });
+  describe("request fail", () => {
+    let getTestData: any;
 
-    const { result } = renderHook(() => useRequest(getTestDataUsingGet), { wrapper });
-    const [getTestData, data$] = result.current;
+    beforeEach(() => {
+      nock(basePath)
+        .get("/api/tests/001")
+        .reply(500, { message: "Something went wrong" }, { "Access-Control-Allow-Origin": "*" });
+      const { result } = renderHook(() => useRequest(getTestDataUsingGet), { wrapper });
+      getTestData = result.current;
+      getTestData.request({ id: "001" });
+    });
 
-    getTestData({ id: "001" });
+    it("should notify error request fail", async () => {
+      const error = await firstValueFrom<AxiosError>(getTestData.error$);
+      expect(error.response?.data).toEqual({ message: "Something went wrong" });
+    });
 
-    data$?.subscribe(({ status, data, error }) => {
-      expect(status).toEqual("failure");
-      expect(error?.response?.data).toEqual({ message: "Something went wrong" });
-      expect(data).toEqual(undefined);
-      done();
+    it("should notify response status when request succeed", async () => {
+      await expect(await firstValueFrom(getTestData.status$)).toEqual({
+        isLoading: false,
+        isError: true,
+        isPending: false,
+        isSuccess: false,
+        isCompleted: true,
+      });
     });
   });
 });

@@ -1,50 +1,65 @@
-import { AxiosError } from "axios";
-import { useContext, useMemo, useRef } from "react";
+import { AxiosError, AxiosResponse } from "axios";
+import { useContext, useEffect, useMemo, useRef } from "react";
 import { Subject } from "rxjs";
 import { CreateRequestReturn } from "./createRequest";
 import { RequestContext } from "./RequestContext";
 
-enum RequestStatus {
-  pending = "pending",
-  success = "success",
-  failure = "failure",
+interface RequestStatus {
+  isLoading: boolean;
+  isError: boolean;
+  isPending: boolean;
+  isSuccess: boolean;
+  isCompleted: boolean;
 }
 
-interface RequestResult<TResp> {
-  status: RequestStatus;
-  data?: TResp;
-  error?: AxiosError;
+export interface UseRequestReturn<TReq, TResp> {
+  data$: Subject<TResp>;
+  error$: Subject<AxiosError>;
+  status$: Subject<RequestStatus>;
+  request: (params: TReq) => Promise<void | AxiosResponse<TResp>>;
 }
 
 export const useRequest = <TReq, TResp>(fn: CreateRequestReturn<TReq, TResp>) => {
-  const dataRef = useRef<Subject<RequestResult<TResp>>>();
+  const dataRef = useRef<UseRequestReturn<TReq, TResp>>({} as UseRequestReturn<TReq, TResp>);
   const { axiosInstance } = useContext(RequestContext);
 
   const requestFn = useMemo(() => {
-    const request$ = new Subject<RequestResult<TResp>>();
-    dataRef.current = request$;
+    const data$ = new Subject<TResp>();
+    const error$ = new Subject<AxiosError>();
+    const status$ = new Subject<RequestStatus>();
+
+    dataRef.current.data$ = data$;
+    dataRef.current.error$ = error$;
+    dataRef.current.status$ = status$;
+
+    const defaultStatus = {
+      isLoading: false,
+      isError: false,
+      isPending: false,
+      isSuccess: false,
+      isCompleted: false,
+    };
 
     return (params: TReq) => {
-      request$.next({ status: RequestStatus.pending });
+      status$.next({ ...defaultStatus, isLoading: true, isPending: true });
 
       return axiosInstance
         .request(fn(params))
-
         .then((resp) => {
-          request$.next({
-            status: RequestStatus.success,
-            data: resp.data,
-          });
+          data$.next(resp.data);
+          status$.next({ ...defaultStatus, isSuccess: true, isCompleted: true });
           return resp;
         })
         .catch((error) => {
-          request$.next({
-            status: RequestStatus.failure,
-            error,
-          });
+          error$.next(error);
+          status$.next({ ...defaultStatus, isError: true, isCompleted: true });
         });
     };
   }, []);
 
-  return [requestFn, dataRef.current] as const;
+  useEffect(() => {
+    dataRef.current.request = requestFn;
+  }, []);
+
+  return dataRef.current;
 };

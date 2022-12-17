@@ -4,7 +4,8 @@
   "main": "src/index.ts",
   "peerDependencies": {
     "react": "^18.0.2",
-    "axios": "^1.2.0"
+    "axios": "^1.2.0",
+    "lodash": "^4.17.21"
   },
   "scripts": {
     "tsc": "tsc",

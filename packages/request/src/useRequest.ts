@@ -1,8 +1,8 @@
 import { AxiosError, AxiosResponse } from "axios";
-import { useContext, useEffect, useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import { Subject } from "rxjs";
 import { CreateRequestReturn } from "./createRequest";
-import { RequestContext } from "./RequestContext";
+import { useRequestContext } from "./useRequestContext";
 
 interface RequestStatus {
   isLoading: boolean;
@@ -21,7 +21,7 @@ export interface UseRequestReturn<TReq, TResp> {
 
 export const useRequest = <TReq, TResp>(fn: CreateRequestReturn<TReq, TResp>) => {
   const dataRef = useRef<UseRequestReturn<TReq, TResp>>({} as UseRequestReturn<TReq, TResp>);
-  const { axiosInstance } = useContext(RequestContext);
+  const { axiosInstance } = useRequestContext();
 
   const requestFn = useMemo(() => {
     const data$ = new Subject<TResp>();

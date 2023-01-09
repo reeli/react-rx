@@ -1,8 +1,7 @@
 import axios, { AxiosError, AxiosRequestConfig, AxiosResponse, CancelTokenSource } from "axios";
-import { dropEmpty } from "./utils";
-
-const createRequestUUId = (requestConfig: AxiosRequestConfig) =>
-  JSON.stringify(dropEmpty([requestConfig.method, requestConfig.url, requestConfig.params]));
+import {
+  createRequestUUId,
+} from "./utils";
 
 export class DuplicateRequestsCanceller {
   private queue: string[] = [];

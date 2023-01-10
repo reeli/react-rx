@@ -22,57 +22,44 @@ interface RequestContextValue {
 
 const createRequestFactory = (client: AxiosInstance) => {
   const requestsCache: {
-    [key: string]: {
-      config: AxiosRequestConfig,
-      sources: Observable<AxiosResponse>[]
-    }
+    [key: string]: Observable<AxiosResponse>
   } = {};
 
   return (axiosRequestConfig: AxiosRequestConfig) => {
     const uuid = createRequestUUId(axiosRequestConfig);
 
-    if (requestsCache[uuid]) {
-      const source$ = new Subject();
+    let request$ = requestsCache[uuid]
 
-      requestsCache[uuid] = {
-        ...requestsCache[uuid],
-        sources: [...requestsCache[uuid].sources, source$]
-      }
+    if (!request$) {
+      requestsCache[uuid] = observableFrom(client.request(axiosRequestConfig))
+      request$ = requestsCache[uuid]
 
-      return source$;
+      const sub = request$.subscribe(() => {
+        delete requestsCache[uuid]
+        sub.unsubscribe()
+      })
     }
 
-    const source$ = observableFrom(client.request(axiosRequestConfig)).pipe(
-      tap((axiosResponse) => {
-        requestsCache[uuid].sources.forEach((resp$) => {
-          resp$.next(axiosResponse)
-        })
+    const source$ = new Subject();
 
-        requestsCache[uuid] = {}
-        return axiosResponse;
-      }),
-    );
-
-    requestsCache[uuid] = {
-      config: axiosRequestConfig,
-      sources: [source$],
-    }
+    request$.subscribe(source$)
 
     return source$;
   };
 }
 
-const createAxiosInstance = ()=>{
+const createAxiosInstance = () => {
   return axios.create();
 }
 
 export const RequestContext = createContext<RequestContextValue>({
-  request: () => {},
+  request: () => {
+  },
 } as unknown as RequestContextValue);
 
 export const RequestProvider: FC<PropsWithChildren> = ({ children }) => {
   const axiosInstance = createAxiosInstance();
-  const {request} = createRequestFactory(axiosInstance);
+  const { request } = createRequestFactory(axiosInstance);
 
   return <RequestContext.Provider value={{ request }}>{children}</RequestContext.Provider>;
 };

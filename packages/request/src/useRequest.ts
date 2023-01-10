@@ -1,7 +1,18 @@
-import { AxiosError, AxiosResponse } from "axios";
-import { useEffect, useMemo, useRef } from "react";
-import { Subject } from "rxjs";
-import { CreateRequestReturn } from "./createRequest";
+import {
+  AxiosError,
+  AxiosResponse,
+} from "axios";
+import {
+  useEffect,
+  useMemo,
+} from "react";
+import {
+  Subject,
+  Observable,
+} from "rxjs";
+import {
+  CreateRequestReturn,
+} from "./createRequest";
 import { useRequestContext } from "./useRequestContext";
 
 interface RequestStatus {
@@ -16,18 +27,25 @@ export interface UseRequestReturn<TReq, TResp> {
   data$: Subject<TResp>;
   error$: Subject<AxiosError>;
   status$: Subject<RequestStatus>;
-  request: (params: TReq) => Promise<void | AxiosResponse<TResp>>;
+  request: (params: TReq) => Observable<AxiosResponse>;
 }
 
 export const useRequest = <TReq, TResp>(fn: CreateRequestReturn<TReq, TResp>) => {
-  const dataRef = useRef<UseRequestReturn<TReq, TResp>>({} as UseRequestReturn<TReq, TResp>);
   const { request } = useRequestContext();
+  const data$ = new Subject();
 
-  const requestFn = useMemo(() => (params: TReq) => request(fn(params)), []);
-
-  useEffect(() => {
-    dataRef.current.request = requestFn;
+  const req= useMemo(() => {
+    return (params: TReq) => {
+      return request(fn(params)).subscribe(data=>{
+        data$.next(data);
+      });
+    };
   }, []);
 
-  return dataRef.current;
+  return [req, data$]
 };
+//
+// const [request, data$]=useRequest(findId);
+// const [request1, data1$]=useRequest(findId);
+// request(1);
+// request1(1);
